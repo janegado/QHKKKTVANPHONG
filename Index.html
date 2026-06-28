@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KKT Vân Phong — Pháp Lý Nhanh | Thuý Đỗ BĐS</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0ece4;
+  --card: #ffffff;
+  --navy: #1c3557;
+  --sea: #2d6a8f;
+  --sand: #b8952a;
+  --sand-light: #f5edd8;
+  --text: #2c2c2c;
+  --text-muted: #6b7280;
+  --border: #ddd5c8;
+  --gpmb-on: #c0392b;
+  --gpmb-prep: #d97706;
+  --gpmb-no: #16a34a;
+  --kkt-in: #2d6a8f;
+  --kkt-part: #b8952a;
+  --kkt-out: #9ca3af;
+  --verified: #059669;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Be Vietnam Pro', sans-serif; font-size: 16px; line-height: 1.6; }
+
+/* ── HEADER ── */
+.header { background: var(--navy); padding: 14px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.brand { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: .5px; opacity: .85; white-space: nowrap; }
+.brand span { color: var(--sand); }
+.search-wrap { flex: 1; position: relative; }
+.search-wrap input {
+  width: 100%; padding: 8px 14px 8px 36px; border-radius: 8px;
+  border: none; background: rgba(255,255,255,.12); color: #fff;
+  font-family: inherit; font-size: 14px; outline: none;
+}
+.search-wrap input::placeholder { color: rgba(255,255,255,.5); }
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: .6; }
+.verified-badge { font-size: 11px; color: #6ee7b7; white-space: nowrap; }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 4px; }
+.tab {
+  padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; color: rgba(255,255,255,.65); border: none; background: transparent;
+  font-family: inherit; transition: all .18s;
+}
+.tab.active { background: var(--sea); color: #fff; }
+.tab:hover:not(.active) { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── CONTENT ── */
+.content { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-size: 18px; font-weight: 700; color: var(--navy);
+  margin: 28px 0 12px; padding-left: 12px;
+  border-left: 4px solid var(--sea);
+}
+.section-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+
+/* ── TIMELINE HẠ TẦNG ── */
+.timeline-wrap { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid var(--border); }
+.timeline-title { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px; }
+.timeline { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.tl-item { display: flex; align-items: flex-start; gap: 14px; }
+.tl-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; margin-top: 3px;
+  border: 2px solid transparent;
+}
+.tl-dot.done { background: var(--verified); border-color: var(--verified); }
+.tl-dot.ongoing { background: #d97706; border-color: #d97706; animation: pulse 1.5s infinite; }
+.tl-dot.soon { background: var(--border); border-color: var(--sea); }
+.tl-dot.far { background: var(--border); border-color: var(--kkt-out); }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(217,119,6,.4); } 50% { box-shadow: 0 0 0 5px rgba(217,119,6,0); } }
+.tl-content { flex: 1; }
+.tl-date { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 1px; }
+.tl-text { font-size: 14px; font-weight: 500; }
+.tl-note { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.tl-item.done .tl-text { color: var(--verified); }
+.tl-item.ongoing .tl-text { color: #92400e; }
+.tl-connector { width: 2px; height: 8px; background: var(--border); margin-left: 6px; }
+
+/* ── BẢNG ── */
+table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; font-size: 14px; margin-bottom: 20px; border: 1px solid var(--border); }
+th { background: var(--navy); color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--sand-light); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.badge-in { background: #dbeafe; color: var(--kkt-in); }
+.badge-part { background: #fef3c7; color: #92400e; }
+.badge-out { background: #f3f4f6; color: #6b7280; }
+.badge-gpmb-on { background: #fee2e2; color: var(--gpmb-on); }
+.badge-gpmb-prep { background: #fef3c7; color: #92400e; }
+.badge-gpmb-no { background: #d1fae5; color: #065f46; }
+.badge-verified { background: #d1fae5; color: #065f46; font-size: 10px; }
+.badge-warn { background: #fef3c7; color: #92400e; font-size: 10px; }
+
+/* ── CARDS PHÂN KHU ── */
+.pk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.pk-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; cursor: pointer; transition: box-shadow .15s; }
+.pk-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+.pk-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.pk-name { font-size: 15px; font-weight: 700; color: var(--navy); }
+.pk-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.pk-badges { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; flex-shrink: 0; }
+.pk-body { padding: 12px 16px; display: none; }
+.pk-card.open .pk-body { display: block; }
+.pk-body dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+.pk-body dt { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+.pk-body dd { font-weight: 500; }
+.pk-toggle { font-size: 11px; color: var(--sea); cursor: pointer; text-align: center; padding: 8px; border-top: 1px solid var(--border); font-weight: 600; }
+
+/* ── VANBANGOC CARDS ── */
+.law-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.law-card { background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 14px 16px; }
+.law-card .law-num { font-size: 11px; font-weight: 700; color: var(--sea); letter-spacing: .5px; margin-bottom: 4px; }
+.law-card .law-name { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+.law-card .law-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* ── HÀNH CHÍNH ── */
+.hanh-chinh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+@media (max-width: 640px) { .hanh-chinh-grid { grid-template-columns: 1fr; } }
+.hc-box { background: var(--card); border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
+.hc-head { background: var(--navy); color: #fff; padding: 10px 14px; font-size: 13px; font-weight: 700; }
+.hc-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: 13px; gap: 8px; }
+.hc-row:last-child { border-bottom: none; }
+.hc-old { color: var(--text-muted); font-size: 12px; }
+.hc-new { font-weight: 600; color: var(--navy); }
+
+/* ── CÂU HỎI THƯỜNG GẶP ── */
+.faq { background: var(--card); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--navy); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.faq-q:hover { background: var(--sand-light); }
+.faq-a { padding: 0 16px; font-size: 13px; color: var(--text); line-height: 1.7; display: none; }
+.faq-item.open .faq-a { display: block; padding-bottom: 12px; }
+.faq-item.open .faq-q { color: var(--sea); }
+
+/* ── HIGHLIGHT ── */
+.highlight { background: #fef3c7; border-radius: 4px; padding: 1px 4px; }
+.warn-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400e; margin-bottom: 16px; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #1e40af; margin-bottom: 16px; }
+
+/* ── SEARCH HIGHLIGHT ── */
+.search-hl { background: #fef08a; border-radius: 3px; }
+mark { background: #fef08a; border-radius: 3px; }
+
+/* ── SCROLL & MISC ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="brand">THUÝ ĐỖ BĐS · <span>Pháp Lý KKT Vân Phong</span></div>
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Tìm kiếm: phân khu, địa danh, văn bản..." oninput="doSearch(this.value)">
+    </div>
+    <div class="verified-badge">✓ Đã xác minh 28/06/2026</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tab1',this)">⚖️ Khung Pháp Lý</button>
+    <button class="tab" onclick="switchTab('tab2',this)">🏖️ Ninh Hòa</button>
+    <button class="tab" onclick="switchTab('tab3',this)">⛵ Vạn Ninh</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ══════════════ TAB 1: KHUNG PHÁP LÝ ══════════════ -->
+<div class="tab-panel active" id="tab1">
+
+  <div class="section-title">Văn bản pháp lý gốc</div>
+  <div class="law-grid">
+    <div class="law-card"><div class="law-num">NQ 09-NQ/TW · 2022</div><div class="law-name">Nghị quyết Bộ Chính trị</div><div class="law-desc">KKT Vân Phong là động lực Nam Trung Bộ. Đánh giá chưa tương xứng tiềm năng, yêu cầu đột phá.</div></div>
+    <div class="law-card"><div class="law-num">NQ 55/2022/QH15</div><div class="law-name">Cơ chế đặc thù Khánh Hòa</div><div class="law-desc">Vay nợ ≤60% | Chuyển đất lúa &lt;500ha | Phân cấp phê duyệt QH cục bộ | Ưu đãi nhà đầu tư chiến lược.</div></div>
+    <div class="law-card"><div class="law-num">QĐ 298/QĐ-TTg · 27/3/2023</div><div class="law-name">QH chung KKT Vân Phong 2040</div><div class="law-desc">150.000 ha · 19 phân khu · Dân số 500.000–550.000 người (2040) · Tầm nhìn 2050.</div></div>
+    <div class="law-card"><div class="law-num">QĐ 318/QĐ-TTg · 29/3/2023</div><div class="law-name">Quy hoạch tỉnh Khánh Hòa 2021–2030</div><div class="law-desc">Bắc Vân Phong: đô thị du lịch + cảng QT | Nam Vân Phong: CN + cảng hàng hóa + logistics.</div></div>
+    <div class="law-card"><div class="law-num">Luật Đất đai 2024 · Điều 79</div><div class="law-name">Thu hồi đất trong KKT</div><div class="law-desc">Nhà nước chỉ trực tiếp thu hồi cho "khu phi thuế quan trong KKT". Còn lại → thỏa thuận nhận QSDĐ.</div></div>
+    <div class="law-card"><div class="law-num">NQ 202/2025 + NQ 1667/NQ-UBTVQH15</div><div class="law-name">Sắp xếp hành chính (01/07/2025)</div><div class="law-desc">Ninh Hòa: 27 → 8 đơn vị. Vạn Ninh: 13 → 5 xã. GCN cũ vẫn hợp lệ (Đ.256 LĐĐ 2024).</div></div>
+  </div>
+
+  <div class="section-title">Ranh giới KKT Vân Phong
+    <div class="section-sub">Theo QĐ 298/2023 — tên xã cũ (trước sáp nhập 2025)</div>
+  </div>
+  <div class="warn-box">⚠️ KKT bao gồm <strong>12/13 xã thị trấn Vạn Ninh — TRỪ xã Xuân Sơn</strong> (nay là một phần xã Vạn Hưng). Phần Xuân Sơn cũ trong xã Vạn Hưng mới <strong>KHÔNG thuộc KKT.</strong></div>
+  <table>
+    <thead><tr><th>Địa bàn</th><th>Xã/phường trong KKT (tên cũ)</th><th>Ghi chú</th></tr></thead>
+    <tbody>
+      <tr><td>Vạn Ninh</td><td>Vạn Thạnh, Vạn Thọ, Đại Lãnh, Vạn Phước, Vạn Bình, Vạn Long, Vạn Khánh, Vạn Thắng, Vạn Phú, Vạn Lương, Vạn Hưng, TT Vạn Giã</td><td><span class="badge badge-warn">Trừ Xuân Sơn</span></td></tr>
+      <tr><td>Ninh Hòa</td><td>P. Ninh Hiệp, Ninh Giang, Ninh Đa, Ninh Thủy, Ninh Diêm, Ninh Hải + Xã Ninh An, Ninh Thọ, Ninh Phước</td><td>9 đơn vị phía Đông Bắc</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Ưu đãi nhà đầu tư chiến lược KKT (Điều 7, NQ 55/2022)</div>
+  <table>
+    <thead><tr><th>Ngành nghề</th><th>Vốn tối thiểu</th><th>Vốn điều lệ tối thiểu</th></tr></thead>
+    <tbody>
+      <tr><td>Khu đô thị ≥300ha hoặc ≥50.000 dân</td><td>25.000 tỷ đồng</td><td>10.000 tỷ</td></tr>
+      <tr><td>TT thương mại, tài chính</td><td>12.000 tỷ đồng</td><td>10.000 tỷ</td></tr>
+      <tr><td>R&D, CN cao, y tế, năng lượng sạch</td><td>6.000 tỷ đồng</td><td>500 tỷ</td></tr>
+      <tr><td>Khu phi thuế quan</td><td>6.000 tỷ đồng</td><td>3.000 tỷ</td></tr>
+      <tr><td>Sân bay, cảng biển loại I</td><td>2.300 tỷ đồng</td><td>1.000 tỷ</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box">💡 Ưu đãi: R&D được tính 150% chi phí vào khấu trừ thuế | Ưu tiên thủ tục hải quan | Ứng trước ≥200 tỷ xây hạ tầng → trừ vào tiền SDĐ</div>
+
+  <div class="section-title">Sáp nhập hành chính (01/07/2025)</div>
+  <div class="hanh-chinh-grid">
+    <div class="hc-box">
+      <div class="hc-head">🏙️ Thị xã Ninh Hòa — 8 đơn vị mới</div>
+      <div class="hc-row"><div><div class="hc-new">Phường Đông Ninh Hòa</div><div class="hc-old">Ninh Diêm + Ninh Hải + Ninh Thủy + Ninh Phước + Ninh Vân</div></div><span class="badge badge-in">Trong KKT</span></div>
+      <div class="hc-row"><div><div class="hc-new">Phường Hòa Thắng</div><div class="hc-old">Ninh Giang + Ninh Hà + Ninh Phú</div></div><span class="badge badge-out">Ngoài KKT</span></div>
+      <div class="hc-row"><div><div class="hc-new">Phường Ninh Hòa</div><div class="hc-old">Ninh Hiệp + Ninh Đa + Ninh Đông + Ninh Phụng</div></div><span class="badge badge-out">Ngoài KKT</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Bắc Ninh Hòa</div><div class="hc-old">Ninh An + Ninh Sơn + Ninh Thọ</div></div><span class="badge badge-part">Một phần</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Tân Định</div><div class="hc-old">Ninh Xuân + Ninh Quang + Ninh Bình</div></div><span class="badge badge-out">Ngoài KKT</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Nam Ninh Hòa</div><div class="hc-old">Ninh Lộc + Ninh Ích + Ninh Hưng + Ninh Tân</div></div><span class="badge badge-out">Ngoài KKT</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Tây Ninh Hòa</div><div class="hc-old">Ninh Tây + Ninh Sim</div></div><span class="badge badge-out">Ngoài KKT</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Hòa Trí</div><div class="hc-old">Ninh Thượng + Ninh Trung + Ninh Thân</div></div><span class="badge badge-out">Ngoài KKT</span></div>
+    </div>
+    <div class="hc-box">
+      <div class="hc-head">⛵ Huyện Vạn Ninh — 5 xã mới (tất cả trong KKT)</div>
+      <div class="hc-row"><div><div class="hc-new">Xã Đại Lãnh</div><div class="hc-old">Vạn Thạnh + Vạn Thọ + Đại Lãnh</div></div><span class="badge badge-in">PK01–05</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Tu Bông</div><div class="hc-old">Vạn Khánh + Vạn Long + Vạn Phước</div></div><span class="badge badge-in">PK08–09</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Vạn Thắng</div><div class="hc-old">Vạn Bình + Vạn Thắng</div></div><span class="badge badge-in">PK08 Sân bay</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Vạn Ninh</div><div class="hc-old">TT Vạn Giã + Vạn Phú + Vạn Lương</div></div><span class="badge badge-in">PK11–12</span></div>
+      <div class="hc-row"><div><div class="hc-new">Xã Vạn Hưng</div><div class="hc-old">Vạn Hưng + Xuân Sơn*</div></div><span class="badge badge-part">Một phần*</span></div>
+      <div style="padding:8px 14px;font-size:12px;color:#92400e;background:#fef3c7;">*Phần Xuân Sơn cũ trong xã Vạn Hưng KHÔNG thuộc KKT theo QĐ 298/2023</div>
+    </div>
+  </div>
+
+  <div class="section-title">TDP mới 2026 — Phường Đông Ninh Hòa</div>
+  <div class="info-box">📌 <strong>Lô LD-148→151 (TDP Mỹ Á cũ):</strong> Nay thuộc <strong>TDP Ninh Thủy 3</strong> (gộp TDP Thủy Đầm + Mỹ Lương + Mỹ Á), Phường Đông Ninh Hòa. Dùng tên này khi viết hợp đồng từ 2026.</div>
+  <table>
+    <thead><tr><th>TDP mới (2026)</th><th>Gộp từ TDP cũ</th><th>Gốc</th></tr></thead>
+    <tbody>
+      <tr><td>TDP Hòn Khói</td><td>Đông Hải 1+2 + Bình Tây 8+9</td><td>P. Ninh Hải cũ</td></tr>
+      <tr><td>TDP Ninh Hải</td><td>Đông Hà 3+4+5 + Bình Tây 6+7</td><td>P. Ninh Hải cũ</td></tr>
+      <tr><td>TDP Ninh Diêm 1</td><td>Thạnh Danh + Phú Thọ 1</td><td>P. Ninh Diêm cũ</td></tr>
+      <tr><td>TDP Ninh Diêm 2</td><td>Phú Thọ 2 + Phú Thọ 3</td><td>P. Ninh Diêm cũ</td></tr>
+      <tr><td>TDP Ninh Thủy 1</td><td>Phú Thạnh + Bá Hà 2</td><td>P. Ninh Thủy cũ</td></tr>
+      <tr><td>TDP Ninh Thủy 2</td><td>Bá Hà 1 + Ngân Hà</td><td>P. Ninh Thủy cũ</td></tr>
+      <tr style="background:#fef3c7"><td><strong>TDP Ninh Thủy 3 ← LÔ LD-148→151</strong></td><td><strong>Thủy Đầm + Mỹ Lương + Mỹ Á</strong></td><td>P. Ninh Thủy cũ</td></tr>
+      <tr><td>TDP Ninh Phước</td><td>Ninh Yến + Mỹ Giang</td><td>X. Ninh Phước cũ</td></tr>
+      <tr><td>TDP Ninh Vân</td><td>Đông + Tây</td><td>P. Ninh Thủy cũ</td></tr>
+      <tr><td>TDP Ninh Tịnh</td><td>Giữ nguyên</td><td>X. Ninh Phước cũ</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Câu hỏi thường gặp</div>
+  <div class="faq" id="faq1">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">GCN cũ ghi xã Ninh Thủy còn dùng được không? <span>▾</span></div><div class="faq-a">Có. GCN cũ vẫn hợp lệ đầy đủ theo Khoản 3 Điều 256 Luật Đất đai 2024. Không bắt buộc đổi, không có thời hạn. Khi giao dịch viết địa chỉ mới: <strong>TDP Ninh Thủy 3, Phường Đông Ninh Hòa, TX Ninh Hòa, tỉnh Khánh Hòa.</strong></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">KCN Ninh Xuân có thuộc KKT Vân Phong không? <span>▾</span></div><div class="faq-a"><strong>Không.</strong> KCN Ninh Xuân thuộc xã Tân Định (Ninh Xuân/Quang/Bình cũ) — nằm hoàn toàn ngoài ranh giới KKT Vân Phong. Không được hưởng cơ chế đặc thù NQ 55. Đây là KCN riêng biệt do tỉnh quản lý.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Xã Xuân Sơn cũ có trong KKT không? <span>▾</span></div><div class="faq-a"><strong>Không.</strong> Theo QĐ 298/2023, KKT bao gồm 12/13 xã thị trấn Vạn Ninh — trừ xã Xuân Sơn. Nay xã Xuân Sơn cũ là một phần xã Vạn Hưng mới, nhưng phần đất này vẫn ngoài KKT. Cần đối chiếu bản đồ ranh giới khi tư vấn lô đất khu vực này.</div></div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 2: NINH HÒA ══════════════ -->
+<div class="tab-panel" id="tab2">
+
+  <div class="section-title">Timeline hạ tầng Ninh Hòa</div>
+  <div class="timeline-wrap">
+    <div class="timeline-title">TIẾN ĐỘ THỰC TẾ · XÁC MINH 28/06/2026</div>
+    <div class="timeline">
+      <div class="tl-item done"><div class="tl-dot done"></div><div class="tl-content"><div class="tl-date">28/5/2026 · ĐÃ HOÀN THÀNH</div><div class="tl-text">✅ Thông xe 20km đầu cao tốc KH–BMT</div><div class="tl-note">Đoạn QL1 Ninh Hòa → QL26. Điểm đầu: nút giao QL26B × QL1, P. Ninh Hòa.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item ongoing"><div class="tl-dot ongoing"></div><div class="tl-content"><div class="tl-date">2/9/2026 · ĐANG PHẤN ĐẤU</div><div class="tl-text">🔄 Thông xe kỹ thuật toàn tuyến 117,5km</div><div class="tl-note">TP2 đang thi công (hầm Phượng Hoàng, địa hình phức tạp). Khai thác đồng bộ 2027.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item ongoing"><div class="tl-dot ongoing"></div><div class="tl-content"><div class="tl-date">12/2024 → 6/2027 · ĐANG THI CÔNG</div><div class="tl-text">🔄 Đường ven biển Vạn Lương–Ninh Hòa</div><div class="tl-note">20,5km · 2.000 tỷ · Lộ giới 30m. GPMB chậm: Ninh Hòa mới đạt 43,5% (5/2025).</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item soon"><div class="tl-dot soon"></div><div class="tl-content"><div class="tl-date">2030 · MỤC TIÊU</div><div class="tl-text">Ninh Hòa đạt đô thị loại III</div><div class="tl-note">Mở rộng 3.140 ha đất đô thị. Định hướng thành phố 2040.</div></div></div>
+    </div>
+  </div>
+
+  <div class="section-title">5 Phân khu Ninh Hòa (trong KKT)
+    <div class="section-sub">Tất cả QĐ phê duyệt ký tháng 6/2025</div>
+  </div>
+  <div class="pk-grid">
+
+    <div class="pk-card" id="pk14">
+      <div class="pk-header">
+        <div><div class="pk-name">PK14 — Ninh Hải · Dốc Lết</div><div class="pk-sub">QĐ 1734/QĐ-UBND · 23/6/2025 · 3.053 ha</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <div class="info-box" style="margin-bottom:10px">📌 <strong>Lô LD-148→151 (TDP Ninh Thủy 3)</strong> thuộc Tiểu khu 14C/14D trong phân khu này.</div>
+        <dl>
+          <dt>Chức năng</dt><dd>Đô thị du lịch ven biển</dd>
+          <dt>Dân số 2040</dt><dd>~54.000 người</dd>
+          <dt>Đất ở (ODT)</dt><dd>427,31 ha</dd>
+          <dt>Đất HH nhà ở+DV</dt><dd>87,55 ha</dd>
+          <dt>Đất dịch vụ</dt><dd>90,20 ha</dd>
+          <dt>Đất DL</dt><dd>159,96 ha</dd>
+          <dt>Ranh giới</dt><dd>Bắc/Đông/Tây: Vịnh Vân Phong; Nam: PK17</dd>
+          <dt>Đường chính</dt><dd>ĐT.651D (48–60m) · ĐT.652B (26–60m) · MC 1-1 (90m)</dd>
+          <dt>TK 14C</dt><dd>Đô thị TMDV + du lịch ven biển — vùng Dốc Lết</dd>
+          <dt>TK 14D</dt><dd>Dân cư đô thị hiện hữu</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('pk14')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="pk15">
+      <div class="pk-header">
+        <div><div class="pk-name">PK15 — Tây Ninh An</div><div class="pk-sub">QĐ 1875/QĐ-UBND · 25/6/2025 · 2.595 ha</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Làng xóm, sinh thái nông nghiệp</dd>
+          <dt>Dân số 2040</dt><dd>~14.000 người</dd>
+          <dt>Đất làng xóm</dt><dd>302,61 ha</dd>
+          <dt>Đất dự trữ CN</dt><dd>130,66 ha</dd>
+          <dt>Đất NN</dt><dd>1.478,37 ha</dd>
+          <dt>Đường chính</dt><dd>QL1 (66m) · ĐT.651D+651G (42m) · Cao tốc CT.01 (~3km)</dd>
+          <dt>Kết nối</dt><dd>ĐT.651D kết nối Dốc Lết phía Đông và cảng Hòn Khói</dd>
+          <dt>Phù hợp</dt><dd>Đất nông thôn/nhà vườn, không phải đô thị mật độ cao</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('pk15')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="pk16">
+      <div class="pk-header">
+        <div><div class="pk-name">PK16 — Đông Bắc Ninh Hòa</div><div class="pk-sub">QĐ 1920/QĐ-UBND · 30/6/2025 · 2.828 ha</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Đô thị sinh thái ven biển</dd>
+          <dt>Dân số 2040</dt><dd>~30.000 người</dd>
+          <dt>Đất ở đô thị</dt><dd>84,32 ha</dd>
+          <dt>Đất làng xóm</dt><dd>515,24 ha</dd>
+          <dt>Đất dịch vụ</dt><dd>73,24 ha</dd>
+          <dt>Đặc trưng</dt><dd>349,84 ha đất làm muối — dự trữ chuyển đổi dài hạn</dd>
+          <dt>TK 16B</dt><dd>TMDV tại nút giao ĐT.651D × QL1 — vị trí thương mại đắt giá</dd>
+          <dt>Ga Hòa Huỳnh</dt><dd>Giữ nguyên, dự trữ nâng cấp khổ lồng 1435mm</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('pk16')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="pk17">
+      <div class="pk-header">
+        <div><div class="pk-name">PK17 — Bắc Hòn Hèo</div><div class="pk-sub">QĐ 1921/QĐ-UBND · 30/6/2025 · 3.679 ha</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Đô thị + CN + hậu cần cảng</dd>
+          <dt>Dân số 2040</dt><dd>~51.000 người</dd>
+          <dt>Đất ở (ODT)</dt><dd>219,66 ha</dd>
+          <dt>Đất HH nhà+DV</dt><dd>187,07 ha</dd>
+          <dt>Đất dịch vụ</dt><dd>133,72 ha</dd>
+          <dt>Đất CN</dt><dd>219,98 ha + dự trữ 766,86 ha</dd>
+          <dt>KCN Ninh Thọ</dt><dd>318 ha chính thức (QĐ 660/2026) · Xã Bắc Ninh Hòa</dd>
+          <dt>Đường chính</dt><dd>QL26B (80m) · ĐT.651B (75m) · ĐT.652B (60m)</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('pk17')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="pk19">
+      <div class="pk-header">
+        <div><div class="pk-name">PK19 — Nam Vân Phong</div><div class="pk-sub">QĐ 1922/QĐ-UBND · 30/6/2025 · 9.945 ha</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-prep">GPMB: Đang</span></div>
+      </div>
+      <div class="pk-body">
+        <div class="warn-box">⚠️ Đây là phân khu cảng + CN — đất ở chỉ 39,60 ha. Không phù hợp tư vấn đất ở dân cư.</div>
+        <dl>
+          <dt>Chức năng</dt><dd>Cảng biển + KCN tập trung</dd>
+          <dt>Dân số 2040</dt><dd>~7.000 người</dd>
+          <dt>Đất CN kho bãi</dt><dd>1.698,52 ha (62,92%)</dd>
+          <dt>Đất ở (ODT)</dt><dd>39,60 ha (rất nhỏ)</dd>
+          <dt>Cảng Nam VP</dt><dd>Tàu tổng hợp ≤100.000T; hàng rời ≤300.000T; hàng lỏng ≤150.000T</dd>
+          <dt>TĐC hiện tại</dt><dd>~500/3.300 hộ đã giao đất; còn ~2.800 hộ chờ</dd>
+          <dt>Địa bàn</dt><dd>Phường Đông Ninh Hòa (Ninh Diêm + Ninh Thủy + Ninh Phước cũ)</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('pk19')">▾ Chi tiết</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">GPMB & Bồi thường — Ninh Hòa</div>
+  <table>
+    <thead><tr><th>Văn bản / Khu vực</th><th>Nội dung chính</th><th>Địa bàn mới</th></tr></thead>
+    <tbody>
+      <tr><td>QĐ 17/2024 — Chi tiết bồi thường TĐC</td><td>Đơn giá chi tiết đất ở, vật kiến trúc, cây trồng</td><td>TX Ninh Hòa</td></tr>
+      <tr><td>QĐ 12/2026 — Đơn giá bồi thường</td><td>Chi phí thu hồi đất thuộc trách nhiệm chủ đầu tư</td><td>TX Ninh Hòa</td></tr>
+      <tr><td>QĐ 14/2025 — Sửa đổi bổ sung TĐC</td><td>Cập nhật hỗ trợ tái định cư</td><td>TX Ninh Hòa</td></tr>
+      <tr style="background:#fef3c7"><td><strong>QĐ 32/2026 — Hỗ trợ khi Nhà nước thu hồi đất</strong></td><td>Tạm cư: 7tr/tháng (phường) / 4tr/tháng (xã) + 5 tháng thêm · Thưởng BG sớm 10% (max 8tr) · Chỉnh lý sổ đỏ miễn phí</td><td>TX Ninh Hòa</td></tr>
+      <tr><td>Đường DT1A / ĐT.652B</td><td>Niêm yết phương án BT 18–27/5/2026. Đất ONT mặt tiền QL1 tham khảo: ~4.831.680đ/m²</td><td>P. Đông Ninh Hòa</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ══════════════ TAB 3: VẠN NINH ══════════════ -->
+<div class="tab-panel" id="tab3">
+
+  <div class="section-title">QĐ 298 — Xương sống pháp lý KKT Vân Phong</div>
+  <div class="law-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+    <div class="law-card"><div class="law-num">Diện tích</div><div class="law-name">150.000 ha</div><div class="law-desc">Đất liền + đảo: 70.822 ha<br>Mặt nước: 79.178 ha<br>19 phân khu chức năng</div></div>
+    <div class="law-card"><div class="law-num">Dân số</div><div class="law-name">500.000–550.000 người</div><div class="law-desc">Đến 2040 (quy đổi cả du lịch)<br>Đến 2030: 350.000–380.000</div></div>
+    <div class="law-card"><div class="law-num">Phân kỳ 2030</div><div class="law-name">Vạn Ninh đạt đô thị loại IV</div><div class="law-desc">Hoàn thành cao tốc KH–BMT<br>KCN + cảng tổng hợp Nam VP đầu tư</div></div>
+    <div class="law-card"><div class="law-num">Phân kỳ 2040</div><div class="law-name">Cảng trung chuyển QT</div><div class="law-desc">Tàu 24.000 TEU / 100.000 tấn<br>Ninh Hòa thành thành phố</div></div>
+  </div>
+
+  <div class="section-title">Timeline hạ tầng Vạn Ninh</div>
+  <div class="timeline-wrap">
+    <div class="timeline-title">TIẾN ĐỘ THỰC TẾ · XÁC MINH 28/06/2026</div>
+    <div class="timeline">
+      <div class="tl-item done"><div class="tl-dot done"></div><div class="tl-content"><div class="tl-date">02/4/2025 · HOÀN THÀNH</div><div class="tl-text">✅ Động thổ KCN Dốc Đá Trắng / Viglacera (288ha)</div><div class="tl-note">Phó TTg Mai Văn Chính dự. Xã Vạn Hưng + Xã Bắc Ninh Hòa. Vốn 1.807 tỷ.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item done"><div class="tl-dot done"></div><div class="tl-content"><div class="tl-date">02/9/2025 · HOÀN THÀNH</div><div class="tl-text">✅ Khởi công chính thức KCN Dốc Đá Trắng</div><div class="tl-note">Nhân kỷ niệm 80 năm Quốc khánh. Mục tiêu vận hành 100ha năm 2026.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item ongoing"><div class="tl-dot ongoing"></div><div class="tl-content"><div class="tl-date">10/2025 → 10/2026 · ĐANG DIỄN RA</div><div class="tl-text">🔄 GPMB KĐT Đầm Môn (~1.440 ha, 970 thửa)</div><div class="tl-note">Nhà đầu tư: Liên danh Mặt trời Phú Quốc + Mặt trời Hạ Long. QĐ thu hồi chính thức dự kiến 10/2026.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item ongoing"><div class="tl-dot ongoing"></div><div class="tl-content"><div class="tl-date">2025–2026 · ĐANG DIỄN RA</div><div class="tl-text">🔄 GPMB KĐT Tu Bông (502,68ha) + KĐT Cổ Mã</div><div class="tl-note">Tu Bông: điều tra kiểm đếm. Cổ Mã: đang lập bảng đền bù chi tiết.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item soon"><div class="tl-dot soon"></div><div class="tl-content"><div class="tl-date">2026 · MỤC TIÊU</div><div class="tl-text">Vận hành khu 1 (100ha) KCN Viglacera</div><div class="tl-note">Mục tiêu của chủ đầu tư và UBND tỉnh Khánh Hòa.</div></div></div>
+      <div class="tl-connector"></div>
+      <div class="tl-item soon"><div class="tl-dot soon"></div><div class="tl-content"><div class="tl-date">Sau 2030 · DÀI HẠN</div><div class="tl-text">Cảng trung chuyển QT Đầm Môn + Sân bay Vân Phong</div><div class="tl-note">Sân bay 497ha tại TK11 PK08 (xã Vạn Thắng) — đang nghiên cứu đề án, chưa phê duyệt.</div></div></div>
+    </div>
+  </div>
+
+  <div class="section-title">10 Phân khu Vạn Ninh</div>
+  <div class="pk-grid">
+
+    <div class="pk-card" id="vn-pk01">
+      <div class="pk-header">
+        <div><div class="pk-name">PK01 — Đảo Hòn Lớn</div><div class="pk-sub">QĐ 1643/QĐ-UBND (2024) · 10.001 ha · Xã Đại Lãnh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>DL sinh thái nghỉ dưỡng cao cấp</dd>
+          <dt>Dân số</dt><dd>0 thường trú · 8.000 quy đổi từ du khách 2040</dd>
+          <dt>Đất DL</dt><dd>414,20 ha</dd>
+          <dt>Đất DV</dt><dd>335,78 ha</dd>
+          <dt>Rừng SX</dt><dd>3.068,50 ha (bảo tồn)</dd>
+          <dt>Kết nối</dt><dd>Cáp treo 4,1km kết nối với núi Khải Lương (PK02)</dd>
+          <dt>XD tối đa</dt><dd>Resort 7 tầng / 28m · MĐ 25%</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk01')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk02">
+      <div class="pk-header">
+        <div><div class="pk-name">PK02 — Núi Khải Lương</div><div class="pk-sub">QĐ 1642/QĐ-UBND (2024) · 4.015 ha · Xã Đại Lãnh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>DL sinh thái nghỉ dưỡng cao cấp · Casino</dd>
+          <dt>Đất DV</dt><dd>105,94 ha</dd>
+          <dt>Đường chính</dt><dd>Đường B3 lộ giới 36m (lòng 26m)</dd>
+          <dt>Kết nối</dt><dd>Cáp treo với PK01 (Hòn Lớn); giáp PK03 (Đầm Môn) phía Bắc</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk02')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk03">
+      <div class="pk-header">
+        <div><div class="pk-name">PK03 — Cảng Đầm Môn</div><div class="pk-sub">QĐ 242/QĐ-UBND (2024) · 4.445 ha · Xã Đại Lãnh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-on">GPMB: Đang</span></div>
+      </div>
+      <div class="pk-body">
+        <div class="warn-box">🚧 GPMB đang triển khai: ~1.440 ha (970 thửa) · 10/2025–10/2026</div>
+        <dl>
+          <dt>Chức năng</dt><dd>Cảng biển loại I + Đô thị dịch vụ hậu cần</dd>
+          <dt>Đất ở</dt><dd>227,76 ha</dd>
+          <dt>Đất DL+DV</dt><dd>586,52 ha</dd>
+          <dt>Đất CN/cảng</dt><dd>386,72 ha</dd>
+          <dt>Cảng sau 2030</dt><dd>Tàu 24.000 TEU / container trung chuyển QT</dd>
+          <dt>Nhà đầu tư KĐT</dt><dd>Liên danh Mặt trời Phú Quốc + Mặt trời Hạ Long</dd>
+          <dt>Đường chính</dt><dd>ĐT.651 lộ giới 75m</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk03')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk04">
+      <div class="pk-header">
+        <div><div class="pk-name">PK04 — Vĩnh Yên · Mũi Đá Son</div><div class="pk-sub">QĐ 1885/QĐ-UBND (2025) · 3.566 ha · Xã Đại Lãnh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-prep">GPMB: Chuẩn bị</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Đô thị + DL nghỉ dưỡng · Bến du thuyền</dd>
+          <dt>Đất ở</dt><dd>51,72 ha</dd>
+          <dt>Đất DV+DL</dt><dd>252,86 ha</dd>
+          <dt>Rừng SX</dt><dd>933,78 ha (26,19%)</dd>
+          <dt>Mũi Đá Son</dt><dd>TT DL, triển lãm QT · XD tối đa 15 tầng (MĐ 25%)</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk04')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk05">
+      <div class="pk-header">
+        <div><div class="pk-name">PK05 — Tuần Lễ · Hòn Ngang</div><div class="pk-sub">QĐ 1686/QĐ-UBND (2025) · 3.064 ha · Xã Đại Lãnh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-prep">GPMB: Chuẩn bị</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>TMDV + DL cao cấp + Sân golf</dd>
+          <dt>Đất ở</dt><dd>47,96 ha</dd>
+          <dt>Đất DV+DL</dt><dd>585,78 ha</dd>
+          <dt>Đường chính</dt><dd>ĐT.651 (75m, có đường sắt đô thị) · Đường ven biển (47m)</dd>
+          <dt>GPMB 5/2025</dt><dd>KDL Hòn Ngang–Bãi Cát Thấm: đang xác định giá đất</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk05')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk08">
+      <div class="pk-header">
+        <div><div class="pk-name">PK08 — Cổ Mã · Tu Bông</div><div class="pk-sub">QĐ 243/QĐ-UBND (2024) · 6.631 ha · Xã Tu Bông + Vạn Thắng</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-on">GPMB: Đang</span></div>
+      </div>
+      <div class="pk-body">
+        <div class="warn-box">🚧 KĐT Cổ Mã đang lập bảng thống kê đền bù · KĐT Tu Bông 502,68ha đang điều tra kiểm đếm</div>
+        <dl>
+          <dt>Chức năng</dt><dd>Đô thị mới cao cấp + TMDV + DL + Sân bay</dd>
+          <dt>Đất nhà ở</dt><dd>~1.132 ha (21,36%)</dd>
+          <dt>Đất DL+DV</dt><dd>504,31 ha</dd>
+          <dt>Sân bay VP</dt><dd>TK11 · 497,15 ha · Xã Vạn Thắng · Đang nghiên cứu đề án</dd>
+          <dt>Đường chính</dt><dd>ĐT.651 (75m) · QL1 (56m) · ĐT.651B (42–60m)</dd>
+          <dt>11 tiểu khu</dt><dd>TK1–2: TMDV cao cấp · TK3–10: Đô thị mới · TK11: Sân bay</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk08')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk09">
+      <div class="pk-header">
+        <div><div class="pk-name">PK09 — Sinh thái Tây Tu Bông</div><div class="pk-sub">.../2026 · ~9.017 ha · Xã Tu Bông</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>DL sinh thái bảo tồn cảnh quan núi rừng</dd>
+          <dt>XD tối đa</dt><dd>MĐ 25% · Tầng cao 3 tầng</dd>
+          <dt>Đất XD 2040</dt><dd>762,15 ha / 9.017 ha</dd>
+          <dt>Phù hợp</dt><dd>Eco-resort quy mô nhỏ · Không phù hợp đất ở hay CN</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk09')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk10">
+      <div class="pk-header">
+        <div><div class="pk-name">PK10 — Sinh thái Tây Vạn Giã</div><div class="pk-sub">.../2026 · ~16.281 ha · Xã Vạn Hưng</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Sinh thái núi + làng nông nghiệp sinh thái</dd>
+          <dt>XD tối đa</dt><dd>Đồi núi: 25% / 3 tầng · Làng xóm: 60% / 5 tầng</dd>
+          <dt>Hồ Đồng Điền</dt><dd>Điểm DL sinh thái tiềm năng</dd>
+          <dt>Lưu ý</dt><dd>Phân khu lớn nhất Vạn Ninh nhưng đất XD chỉ ~4%</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk10')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk11">
+      <div class="pk-header">
+        <div><div class="pk-name">PK11 — Đô thị Vạn Giã</div><div class="pk-sub">.../2026 · ~3.338 ha · Xã Vạn Ninh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-no">GPMB: Chưa</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Trung tâm kinh tế, chính trị, văn hóa Vạn Ninh</dd>
+          <dt>Đường chính</dt><dd>QL1 (66m) · ĐT.651D (42m) · ĐT.651B ven biển (26–30m)</dd>
+          <dt>Tính chất</dt><dd>Đô thị hiện hữu cải tạo + phát triển mới</dd>
+          <dt>Phù hợp</dt><dd>Đất ở + TMDV tại thị tứ hiện hữu</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk11')">▾ Chi tiết</div>
+    </div>
+
+    <div class="pk-card" id="vn-pk12">
+      <div class="pk-header">
+        <div><div class="pk-name">PK12 — Nam Vạn Giã</div><div class="pk-sub">.../2026 · ~4.374 ha · Xã Vạn Ninh</div></div>
+        <div class="pk-badges"><span class="badge badge-in">Trong KKT</span><span class="badge badge-gpmb-prep">GPMB: Đang (ven biển)</span></div>
+      </div>
+      <div class="pk-body">
+        <dl>
+          <dt>Chức năng</dt><dd>Đô thị Nam Vạn Giã · Dân cư hiện hữu cải tạo</dd>
+          <dt>Đường chính</dt><dd>QL1 (32,5m) · ĐT.651B ven biển (30m) · ĐT.651D (42m)</dt>
+          <dt>GPMB ven biển</dt><dd>300 trường hợp xã Vạn Hưng; QĐ 1040/5/2025 phê duyệt giá đất</dd>
+          <dt>Phù hợp</dt><dd>Đất ở dân cư, tiếp giáp trung tâm Vạn Giã</dd>
+        </dl>
+      </div>
+      <div class="pk-toggle" onclick="togglePk('vn-pk12')">▾ Chi tiết</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">GPMB tổng hợp Vạn Ninh</div>
+  <table>
+    <thead><tr><th>Khu vực / Dự án</th><th>Diện tích</th><th>Địa bàn</th><th>Tình trạng</th></tr></thead>
+    <tbody>
+      <tr><td><strong>KĐT Đầm Môn</strong></td><td>~1.440 ha (970 thửa)</td><td>Xã Đại Lãnh</td><td><span class="badge badge-gpmb-on">Đang 10/2025–10/2026</span></td></tr>
+      <tr><td><strong>KĐT Tu Bông</strong></td><td>502,68 ha</td><td>Xã Tu Bông</td><td><span class="badge badge-gpmb-prep">Điều tra kiểm đếm</span></td></tr>
+      <tr><td><strong>KĐT Cổ Mã</strong></td><td>Chưa có tổng</td><td>Xã Tu Bông</td><td><span class="badge badge-gpmb-prep">Đang lập bảng đền bù</span></td></tr>
+      <tr><td>KCN Dốc Đá Trắng</td><td>288 ha</td><td>Xã Vạn Hưng + Bắc Ninh Hòa</td><td><span class="badge badge-gpmb-prep">Đang GPMB · KS 02/9/2025</span></td></tr>
+      <tr><td>Đường ven biển (đoạn VN)</td><td>12,7km / ~51ha</td><td>Xã Vạn Ninh + Vạn Hưng</td><td><span class="badge badge-gpmb-on">19,6% bàn giao (5/2025)</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Câu hỏi thường gặp — Vạn Ninh</div>
+  <div class="faq">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Cao tốc KH–BMT thông chưa? Mốc nào chắc chắn? <span>▾</span></div><div class="faq-a">Đã thông xe kỹ thuật <strong>20km đầu tuyến</strong> (QL1 Ninh Hòa → QL26) từ <strong>28/5/2026</strong> — đây là thực tế, không phải tương lai. Toàn tuyến 117,5km phấn đấu thông xe 2/9/2026; khai thác đồng bộ 2027. TP2 (qua rừng, hầm Phượng Hoàng) đang chậm tiến độ.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">KCN Viglacera/Dốc Đá Trắng tiến độ thực tế? <span>▾</span></div><div class="faq-a">Động thổ 02/4/2025 (có Phó TTg dự). Khởi công chính thức <strong>02/9/2025</strong>. Phép xây dựng san nền cấp 15/8/2025. Mục tiêu vận hành <strong>100ha đầu (khu 1) năm 2026</strong>. Đây là dự án CN đầu tiên thực sự được xây dựng trong KKT sau 20 năm quy hoạch.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Đường ven biển Vạn Lương–Ninh Hòa bao giờ xong? <span>▾</span></div><div class="faq-a">Khởi công 20/12/2024. Dự kiến hoàn thành <strong>6/2027</strong> (không phải 2026 như một số thông tin cũ). Tiến độ đang chậm do GPMB: Vạn Ninh 19,6%, Ninh Hòa 43,5% (tháng 5/2025). Lộ giới 30m, vận tốc 50km/h.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Sân bay Vân Phong bao giờ có? <span>▾</span></div><div class="faq-a">Hiện đang nghiên cứu đề án — <strong>chưa có quyết định đầu tư</strong>, chưa được bổ sung vào QH mạng cảng hàng không quốc gia. Vị trí quy hoạch: TK11, PK08, xã Vạn Thắng, 497ha. <strong>Không dùng làm catalyst chắc chắn khi tư vấn.</strong></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">GPMB Vạn Ninh đang ở đâu? <span>▾</span></div><div class="faq-a">3 khu đang triển khai đồng loạt: <strong>Đầm Môn</strong> (~1.440ha, 10/2025–10/2026) · <strong>Tu Bông</strong> (503ha, đang điều tra) · <strong>Cổ Mã</strong> (đang lập bảng đền bù). Tổng ~2.230ha có pháp lý. Đây là tín hiệu KKT đang bước vào giai đoạn thực thi thực sự.</div></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── Tab switching ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── PK accordion ──
+function togglePk(id) {
+  const card = document.getElementById(id);
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  card.querySelector('.pk-toggle').textContent = isOpen ? '▾ Chi tiết' : '▴ Thu gọn';
+}
+
+// ── FAQ accordion ──
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  item.classList.toggle('open', !isOpen);
+  el.querySelector('span').textContent = isOpen ? '▾' : '▴';
+}
+
+// ── Search ──
+let searchTimeout;
+function doSearch(q) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    // Remove old highlights
+    document.querySelectorAll('mark').forEach(m => {
+      m.replaceWith(m.textContent);
+    });
+    if (!q || q.length < 2) return;
+
+    const panels = document.querySelectorAll('.tab-panel');
+    let firstMatch = null;
+    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+
+    // Search in text nodes
+    const walker = document.createTreeWalker(document.querySelector('.content'), NodeFilter.SHOW_TEXT, null);
+    const matches = [];
+    let node;
+    while (node = walker.nextNode()) {
+      if (node.textContent.match(re) && !['SCRIPT','STYLE','INPUT'].includes(node.parentElement.tagName)) {
+        matches.push(node);
+      }
+    }
+
+    matches.forEach(node => {
+      const span = document.createElement('span');
+      span.innerHTML = node.textContent.replace(re, '<mark>$1</mark>');
+      node.parentNode.replaceChild(span, node);
+      // Auto-open parent pk-card if needed
+      const card = span.closest('.pk-card');
+      if (card) {
+        card.classList.add('open');
+        const tog = card.querySelector('.pk-toggle');
+        if (tog) tog.textContent = '▴ Thu gọn';
+      }
+      const faqItem = span.closest('.faq-item');
+      if (faqItem) {
+        faqItem.classList.add('open');
+        const sp = faqItem.querySelector('.faq-q span');
+        if (sp) sp.textContent = '▴';
+      }
+      if (!firstMatch) firstMatch = span;
+    });
+
+    if (firstMatch) {
+      // Switch to correct tab
+      const panel = firstMatch.closest('.tab-panel');
+      if (panel && !panel.classList.contains('active')) {
+        const idx = Array.from(document.querySelectorAll('.tab-panel')).indexOf(panel);
+        const tabs = document.querySelectorAll('.tab');
+        if (tabs[idx]) switchTab(panel.id, tabs[idx]);
+      }
+      firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 300);
+}
+</script>
+</body>
+</html>
